@@ -1,0 +1,67 @@
+[project]
+name = "sapiens"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11, <3.12"
+dependencies = [
+  "sapiens-cv",
+  "torch>=2.7.0",
+  "torchaudio",
+  "torchvision>=0.20.1",
+  "kaolin",
+  "sapiens-engine",
+  "sapiens-det",
+]
+
+[[tool.uv.index]]
+name = "pytorch-nightly"
+url = "https://download.pytorch.org/whl/nightly/cu128"
+explicit = true
+
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "mtb"
+url = "https://wheels.melmassadian.com"
+explicit = true
+
+[[tool.uv.index]]
+name = "kaolin"
+url = "https://nvidia-kaolin.s3.us-east-2.amazonaws.com/index.html"
+explicit = true
+
+
+[tool.uv.sources]
+sapiens-cv = { path = "cv" }
+torch = [
+  { index = "pytorch-nightly", marker = "sys_platform == 'win32'" },
+  { index = "pytorch-cpu", marker = "platform_system == 'Darwin'" },
+]
+
+xformers = [{ index = "pytorch-nightly", marker = "sys_platform == 'win32'" }]
+torchvision = [
+  { index = "pytorch-nightly", marker = "sys_platform == 'win32'" },
+  { index = "pytorch-cpu", marker = "platform_system == 'Darwin'" },
+]
+torchaudio = [
+
+  { index = "pytorch-nightly", marker = "sys_platform == 'win32'" },
+  { index = "pytorch-cpu", marker = "platform_system == 'Darwin'" },
+]
+sapiens-engine = { path = "engine" }
+sapiens-det = { path = "det" }
+
+[dependency-groups]
+dev = [
+    "setuptools>=80.9.0",
+]
