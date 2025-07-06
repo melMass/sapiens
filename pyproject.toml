@@ -12,6 +12,13 @@ dependencies = [
   "kaolin",
   "sapiens-engine",
   "sapiens-det",
+  "json-tricks>=3.17.3",
+  "tqdm>=4.67.1",
+  "opencv-python>=4.11.0.86",
+  # "openmim>=0.3.9",
+  "mmcv==2.1.0",
+  # "mmengine==0.10.7",
+  "mmdet",
 ]
 
 [[tool.uv.index]]
@@ -48,6 +55,7 @@ torch = [
   { index = "pytorch-cpu", marker = "platform_system == 'Darwin'" },
 ]
 
+
 xformers = [{ index = "pytorch-nightly", marker = "sys_platform == 'win32'" }]
 torchvision = [
   { index = "pytorch-nightly", marker = "sys_platform == 'win32'" },
@@ -60,8 +68,8 @@ torchaudio = [
 ]
 sapiens-engine = { path = "engine" }
 sapiens-det = { path = "det" }
+mmcv = { index = "mtb", marker = "sys_platform == 'win32'" }
+mmdet = { index = "mtb", marker = "sys_platform == 'win32'" }
 
 [dependency-groups]
-dev = [
-    "setuptools>=80.9.0",
-]
+dev = ["setuptools>=80.9.0"]
