@@ -1,0 +1,31 @@
+[project]
+name = "sapiens-pretrain"
+dynamic = [
+  "authors",
+  "classifiers",
+  "description",
+  "keywords",
+  "optional-dependencies",
+  "version",
+]
+requires-python = ">=3.11"
+dependencies = [
+  "einops>=0.8.1",
+  "importlib-metadata>=8.7.0",
+  "mat4py>=0.6.0",
+  "matplotlib>=3.10.3",
+  "sapiens-cv",
+  "sapiens-engine",
+  "modelindex>=0.0.2",
+  "numpy>=1.26.4",
+  "pycocotools>=2.0.10",
+  "rich>=14.0.0",
+  "transformers>=4.28.0",
+]
+
+[tools.setuptools]
+dynamic = ["keywords"]
+
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"

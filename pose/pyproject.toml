@@ -1,0 +1,31 @@
+[project]
+name = "sapiens-pose"
+dynamic = [
+  "authors",
+  "classifiers",
+  "description",
+  "optional-dependencies",
+  "version",
+]
+
+requires-python = "==3.11.*"
+dependencies = [
+  "chumpy",
+  "json-tricks",
+  "matplotlib",
+  "munkres",
+  "numpy",
+  "opencv-python",
+  "pillow",
+  "scipy",
+  "torchvision",
+  "xtcocotools>=1.12",
+]
+
+[tools.setuptools]
+dynamic = ["keywords"]
+
+
+[build-system]
+requires = ["setuptools>=42", "torch>1.8", "numpy<2.0.0"]
+build-backend = "setuptools.build_meta"

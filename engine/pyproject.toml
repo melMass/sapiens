@@ -1,0 +1,28 @@
+[project]
+name = "sapiens-engine"
+readme = "README.md"
+dynamic = [
+  "authors",
+  "classifiers",
+  "description",
+  "optional-dependencies",
+  "version",
+]
+requires-python = ">=3.11"
+dependencies = [
+    "addict>=2.4.0",
+    "matplotlib>=3.10.3",
+    "numpy>=1.26.4",
+    "pyyaml>=6.0.2",
+    "regex>=2024.11.6 ; sys_platform == 'win32'",
+    "rich>=14.0.0",
+    "termcolor>=3.1.0",
+    "yapf>=0.43.0",
+]
+
+[tools.setuptools]
+dynamic = ["keywords"]
+
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
