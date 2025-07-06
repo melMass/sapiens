@@ -17,7 +17,9 @@ from mmengine.model import BaseModule
 from mmengine.utils import digit_version
 from transformers.modeling_outputs import (
     BaseModelOutputWithPastAndCrossAttentions, ModelOutput, Seq2SeqLMOutput)
-from transformers.modeling_utils import (GenerationConfig, GenerationMixin,
+
+from transformers import GenerationMixin
+from transformers.modeling_utils import (GenerationConfig,
                                          PretrainedConfig)
 
 from mmpretrain.registry import MODELS

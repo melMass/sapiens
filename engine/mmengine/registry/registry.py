@@ -603,6 +603,7 @@ class Registry:
             force (bool): Whether to override an existing class with the same
                 name. Defaults to False.
         """
+
         if not callable(module):
             raise TypeError(f'module must be Callable, but got {type(module)}')
 
@@ -613,8 +614,17 @@ class Registry:
         for name in module_name:
             if not force and name in self._module_dict:
                 existed_module = self.module_dict[name]
-                raise KeyError(f'{name} is already registered in {self.name} '
-                               f'at {existed_module.__module__}')
+
+                from ..logging import print_log
+                # raise KeyError(f'{name} is already registered in {self.name} '
+                #                f'at {existed_module.__module__}')
+                print_log(
+                    f"{name} is already registered in {self.name} "
+                    f"at {existed_module.__module__}. Registration ignored.",
+                    logger="current",
+                    level=logging.INFO,
+                )
+
             self._module_dict[name] = module
 
     def register_module(
