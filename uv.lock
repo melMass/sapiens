@@ -3159,6 +3159,7 @@ dependencies = [
     { name = "torchvision", version = "0.22.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'darwin' and sys_platform != 'win32'" },
     { name = "torchvision", version = "0.24.0.dev20250706+cu128", source = { registry = "https://download.pytorch.org/whl/nightly/cu128" }, marker = "sys_platform == 'win32'" },
     { name = "tqdm" },
+    { name = "triton" },
 ]
 
 [package.dev-dependencies]
@@ -3189,6 +3190,7 @@ requires-dist = [
     { name = "torchvision", marker = "sys_platform == 'darwin'", specifier = ">=0.20.1", index = "https://download.pytorch.org/whl/cpu" },
     { name = "torchvision", marker = "sys_platform == 'win32'", specifier = ">=0.20.1", index = "https://download.pytorch.org/whl/nightly/cu128" },
     { name = "tqdm", specifier = ">=4.67.1" },
+    { name = "triton", url = "https://github.com/woct0rdho/triton-windows/releases/download/v3.2.0-windows.post9/triton-3.2.0-cp311-cp311-win_amd64.whl" },
 ]
 
 [package.metadata.requires-dev]
@@ -4323,6 +4325,31 @@ sdist = { url = "https://files.pythonhosted.org/packages/9f/2c/68a0024c311db41bb
 wheels = [
     { url = "https://files.pythonhosted.org/packages/8d/10/8cef2288810a3210659eb3a20711e8387cc35a881a7762ae387806e2d651/transformers-4.53.1-py3-none-any.whl", hash = "sha256:c84f3c3e41c71fdf2c60c8a893e1cd31191b0cb463385f4c276302d2052d837b", size = 10825681, upload-time = "2025-07-04T08:28:37.318Z" },
 ]
+
+[[package]]
+name = "triton"
+version = "3.2.0"
+source = { url = "https://github.com/woct0rdho/triton-windows/releases/download/v3.2.0-windows.post9/triton-3.2.0-cp311-cp311-win_amd64.whl" }
+wheels = [
+    { url = "https://github.com/woct0rdho/triton-windows/releases/download/v3.2.0-windows.post9/triton-3.2.0-cp311-cp311-win_amd64.whl", hash = "sha256:2b56d29d27ff2978202d4e74f0be821b365783110df7f012b9666faa12c388ee" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "autopep8", marker = "extra == 'tests'" },
+    { name = "cmake", marker = "extra == 'build'", specifier = ">=3.20" },
+    { name = "flake8", marker = "extra == 'tests'" },
+    { name = "isort", marker = "extra == 'tests'" },
+    { name = "lit", marker = "extra == 'build'" },
+    { name = "llnl-hatchet", marker = "extra == 'tests'" },
+    { name = "matplotlib", marker = "extra == 'tutorials'" },
+    { name = "numpy", marker = "extra == 'tests'" },
+    { name = "pandas", marker = "extra == 'tutorials'" },
+    { name = "pytest", marker = "extra == 'tests'" },
+    { name = "scipy", marker = "extra == 'tests'", specifier = ">=1.7.1" },
+    { name = "tabulate", marker = "extra == 'tutorials'" },
+]
+provides-extras = ["build", "tests", "tutorials"]
 
 [[package]]
 name = "ttach"
