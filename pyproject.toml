@@ -5,21 +5,27 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11, <3.12"
 dependencies = [
-  "sapiens-cv",
   "torch>=2.7.0",
   "torchaudio",
   "torchvision>=0.20.1",
   "kaolin",
-  "sapiens-engine",
-  "sapiens-det",
   "json-tricks>=3.17.3",
   "tqdm>=4.67.1",
   "opencv-python>=4.11.0.86",
   # "openmim>=0.3.9",
-  "mmcv==2.1.0",
   # "mmengine==0.10.7",
-  "mmdet",
+  "sapiens-pose",
+  "sapiens-pretrain",
+  "sapiens-det",
+  "sapiens-engine",
+
+  "sapiens-cv",
+  "numpy<2.0.0",
+  "pandas>=2.3.0",
 ]
+
+[tool.uv]
+no-build-isolation-package = ["sapiens-det"]
 
 [[tool.uv.index]]
 name = "pytorch-nightly"
@@ -49,7 +55,6 @@ explicit = true
 
 
 [tool.uv.sources]
-sapiens-cv = { path = "cv" }
 torch = [
   { index = "pytorch-nightly", marker = "sys_platform == 'win32'" },
   { index = "pytorch-cpu", marker = "platform_system == 'Darwin'" },
@@ -66,10 +71,38 @@ torchaudio = [
   { index = "pytorch-nightly", marker = "sys_platform == 'win32'" },
   { index = "pytorch-cpu", marker = "platform_system == 'Darwin'" },
 ]
-sapiens-engine = { path = "engine" }
-sapiens-det = { path = "det" }
 mmcv = { index = "mtb", marker = "sys_platform == 'win32'" }
 mmdet = { index = "mtb", marker = "sys_platform == 'win32'" }
 
+
+sapiens-cv = [
+  { index = "mtb", marker = "sys_platform == 'win32'" },
+  { git = "https://github.com/facebookresearch/sapiens.git", subdirectory = "cv", marker = "sys_platform != 'win32'" },
+]
+sapiens-pretrain = [
+  { git = "https://github.com/facebookresearch/sapiens.git", subdirectory = "pretrain" },
+]
+
+sapiens-engine = [
+  # { index = "mtb", marker = "sys_platform == 'win32'" },
+  # { git = "https://github.com/facebookresearch/sapiens.git", subdirectory = "engine", marker = "sys_platform != 'win32'" },
+  { git = "https://github.com/facebookresearch/sapiens.git", subdirectory = "engine" },
+]
+sapiens-det = [
+  # { index = "mtb", marker = "sys_platform == 'win32'" },
+  # { git = "https://github.com/facebookresearch/sapiens.git", subdirectory = "det", marker = "sys_platform != 'win32'" },
+  { git = "https://github.com/facebookresearch/sapiens.git", subdirectory = "det" },
+]
+sapiens-pose = [
+  # { index = "mtb", marker = "sys_platform == 'win32'" },
+  # { git = "https://github.com/facebookresearch/sapiens.git", subdirectory = "pose", marker = "sys_platform != 'win32'" },
+  { git = "https://github.com/facebookresearch/sapiens.git", subdirectory = "pose" },
+]
+
+# sapiens-cv = { path = "cv" }
+# sapiens-engine = { path = "engine" }
+# sapiens-det = { path = "det" }
+# sapiens-pose = { path = "pose" }
+
 [dependency-groups]
-dev = ["setuptools>=80.9.0"]
+dev = ["pip", "setuptools>=80.9.0"]
