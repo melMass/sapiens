@@ -351,9 +351,10 @@ def main():
     if not USE_TORCHSCRIPT:
         dtype = torch.half if args.fp16 else torch.bfloat16
         pose_estimator.to(dtype)
-        pose_estimator = torch.compile(
-            pose_estimator, mode="max-autotune", fullgraph=True
-        )
+        pose_estimator = torch.compile(pose_estimator, mode="default")
+        # pose_estimator = torch.compile(
+        #     pose_estimator, mode="max-autotune", fullgraph=True
+        # )
     else:
         dtype = torch.float32  # TorchScript models use float32
         pose_estimator = pose_estimator.to(args.device)

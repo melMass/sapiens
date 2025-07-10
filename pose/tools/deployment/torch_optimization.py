@@ -5,39 +5,19 @@
 # LICENSE file in the root directory of this source tree.
 
 import argparse
-import itertools
-import json
 import os
-import os.path as osp
-import time
 from pathlib import Path
-from typing import Optional, Tuple
+import logging
 
-import cv2
-import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
-import torch.nn as nn
-import torch.nn.utils.parametrize as parametrize
-import torch.utils.benchmark as benchmark
-from mmdet.apis import inference_detector, init_detector
-from mmengine import Config
 from mmengine.dataset import Compose, pseudo_collate
-from mmengine.fileio import dump
-from mmengine.model.utils import revert_sync_batchnorm
-from mmengine.registry import init_default_scope
-from mmengine.runner import get_state_dict, load_checkpoint, Runner, save_checkpoint
-from mmengine.utils import mkdir_or_exist
 
 # from mmseg.models import build_segmentor
 from mmpose.apis import init_model as init_pose_estimator
-from mmpose.utils import adapt_mmdet_pipeline
 
-from torch._dynamo import is_compiling as dynamo_is_compiling
-from torch._higher_order_ops.out_dtype import out_dtype
-from torch.profiler import ProfilerActivity
-from tqdm import tqdm
+logging.basicConfig(level=logging.DEBUG)
 
 
 def _benchmark(model, inputs, model_name=""):
@@ -115,7 +95,7 @@ def _convert_batchnorm(module):
         module_output.num_batches_tracked = module.num_batches_tracked
     for name, child in module.named_children():
         module_output.add_module(name, _convert_batchnorm(child))
-    del module
+    # del module
     return module_output
 
 
@@ -169,14 +149,22 @@ def _demo_mm_inputs_pose(input_shape, dataset_meta, pipeline):
 
 def explain_model(model, inputs):
     # imgs = inputs["imgs"]
-    for k, v in inputs.items():
-        if isinstance(v, torch.Tensor):
-            inputs[k] = v.cuda()
+    # for k, v in inputs.items():
+    #     if isinstance(v, torch.Tensor):
+    #         inputs[k] = v.cuda()
+    # with torch.no_grad(), torch.autocast("cuda"):
+    #     explanation = torch._dynamo.explain(model)(**inputs)
+    # for k, v in inputs.items():
+    #     if isinstance(v, torch.Tensor):
+    #         inputs[k] = v.cpu()
+    # return explanation.graphs, explanation.graph_count, explanation.break_reasons
+    inputs_cuda = {
+        k: v.cuda() if isinstance(v, torch.Tensor) else v for k, v in inputs.items()
+    }
+
     with torch.no_grad(), torch.autocast("cuda"):
-        explanation = torch._dynamo.explain(model)(**inputs)
-    for k, v in inputs.items():
-        if isinstance(v, torch.Tensor):
-            inputs[k] = v.cpu()
+        explanation = torch._dynamo.explain(model)(**inputs_cuda)
+
     return explanation.graphs, explanation.graph_count, explanation.break_reasons
 
 
@@ -191,22 +179,36 @@ def compile_model(
     modes = {"Default": "default", "RO": "reduce-overhead", "MA": "max-autotune"}
     min_mean = float("inf")
     best_mode = None
+
+    inputs_gpu = {
+        k: v.cuda() if isinstance(v, torch.Tensor) else v for k, v in inputs.items()
+    }
+
+    args = (inputs_gpu["inputs"],)
     kwargs = {}
-    args = (inputs["inputs"],)
+
     dynamic_batch = torch.export.Dim("batch", min=1, max=max_batch_size)
     dynamic_shapes = {"inputs": {0: dynamic_batch}}
+
+    logging.info(f"Exporting model with dynamic shapes: {dynamic_shapes}")
+
     exported_model = torch.export.export(
         model, args=args, kwargs=kwargs, dynamic_shapes=dynamic_shapes
     )
+    logging.info("Model exported successfully.")
+
+    # - benchmark compiles
     for mode_str, mode in modes.items():
         print(f"Compiling model with {mode_str} mode")
+        print(inputs)
         model = torch.compile(exported_model.module(), mode=mode)
-        s = torch.cuda.Stream()
-        s.wait_stream(torch.cuda.current_stream())
-        with torch.cuda.stream(s), torch.no_grad():
-            for i in range(3):
-                model(inputs["inputs"])
-        torch.cuda.current_stream().wait_stream(s)
+        # s = torch.cuda.Stream()
+        # s.wait_stream(torch.cuda.current_stream())
+        # with torch.cuda.stream(s), torch.no_grad():
+        # with torch.no_grad():
+        #     for i in range(3):
+        #         model(inputs["inputs"])
+        # torch.cuda.current_stream().wait_stream(s)
         mean = _benchmark(
             exported_model.module(), inputs["inputs"], model_name=mode_str
         )
@@ -274,6 +276,9 @@ def main():
         raise ValueError("invalid pose input shape")
 
     os.makedirs(args.output_dir, exist_ok=True)
+
+    logging.info(f"Output directory: {args.output_dir}")
+
     pose_checkpoint_basename = Path(args.pose_checkpoint).stem
 
     max_batch_size = args.max_batch_size
@@ -282,6 +287,10 @@ def main():
         *pose_input_shape[1:],
     )
 
+    logging.info(f"Pose max batch size: {max_batch_size}")
+    logging.info(f"Pose input shape: {pose_input_shape}")
+
+    logging.info("Initializing pose estimator")
     pose_model = init_pose_estimator(
         args.pose_config,
         args.pose_checkpoint,
@@ -290,18 +299,24 @@ def main():
     )
     pose_model.forward = pose_model._forward
 
+    logging.info("Loading Dataset")
     pipeline = Compose(pose_model.cfg.test_dataloader.dataset.pipeline)
     dataset_meta = pose_model.dataset_meta
 
     mm_inputs_pose = _demo_mm_inputs_pose(pose_input_shape, dataset_meta, pipeline)
 
     if torch.cuda.is_available():
+        logging.info("Using CUDA")
         pose_model.cuda()
 
     dtype = torch.bfloat16 if not args.fp16 else torch.half
 
-    _benchmark(pose_model, mm_inputs_pose, "Original")
+    logging.info(f"Using dtype: {dtype}")
 
+    logging.info("Skipping benchmark")
+    # _benchmark(pose_model, mm_inputs_pose, "Original")
+
+    logging.info("Explaining model")
     graphs, graph_counts, break_reasons = explain_model(pose_model, mm_inputs_pose)
 
     if args.explain_verbose:
@@ -317,8 +332,9 @@ def main():
     mm_inputs_pose["inputs"] = mm_inputs_pose["inputs"].to(dtype=dtype).cuda()
     save_path = os.path.join(
         args.output_dir,
-        f"{pose_checkpoint_basename}_{'float16' if dtype==torch.float16 else 'bfloat16'}.pt2",
+        f"{pose_checkpoint_basename}_{'float16' if dtype == torch.float16 else 'bfloat16'}.pt2",
     )
+    logging.info(f"Compiling model to {save_path}")
     compile_model(
         pose_model,
         mm_inputs_pose,
@@ -326,6 +342,7 @@ def main():
         max_batch_size=max_batch_size,
         dtype=dtype,
     )
+    logging.info("Done!")
 
 
 if __name__ == "__main__":
