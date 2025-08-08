@@ -33,13 +33,13 @@ jobs:
         run: |
           matrix="[]"
           if [ "${{ github.event.inputs.build_windows }}" == "true" ]; then
-            matrix=$(echo "$matrix" | jq '. + ["windows-latest"]')
+            matrix=$(echo "$matrix" | jq -c '. + ["windows-latest"]')
           fi
           if [ "${{ github.event.inputs.build_linux }}" == "true" ]; then
-            matrix=$(echo "$matrix" | jq '. + ["ubuntu-latest"]')
+            matrix=$(echo "$matrix" | jq -c '. + ["ubuntu-latest"]')
           fi
           if [ "${{ github.event.inputs.build_macos }}" == "true" ]; then
-            matrix=$(echo "$matrix" | jq '. + ["macos-latest"]')
+            matrix=$(echo "$matrix" | jq -c '. + ["macos-latest"]')
           fi
           echo "os_matrix=${matrix}" >> $GITHUB_OUTPUT
 
