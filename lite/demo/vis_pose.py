@@ -489,7 +489,7 @@ def main():
 
         args_list = [
             (
-                i.numpy(),
+                _im.numpy(),
                 r,
                 os.path.join(args.output_root, os.path.basename(img_name)),
                 (input_shape[2], input_shape[1]),
@@ -500,7 +500,7 @@ def main():
                 SKELETON_INFO,
                 args.thickness,
             )
-            for i, r, img_name in zip(
+            for _im, r, img_name in zip(
                 batch_orig_imgs[:valid_images_len],
                 batched_results[:valid_images_len],
                 batch_image_name,
