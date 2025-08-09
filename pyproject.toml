@@ -22,6 +22,9 @@ dependencies = [
   "triton",
 ]
 
+[tool.uv]
+extra-build-dependencies = { xtcocotools = ["numpy", "setuptools"] }
+
 [[tool.uv.index]]
 name = "pytorch-nightly"
 url = "https://download.pytorch.org/whl/nightly/cu128"
