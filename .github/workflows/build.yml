@@ -3,6 +3,11 @@ name: 📦 Build and Append Wheels
 on:
   workflow_dispatch:
     inputs:
+      python_version:
+        description: 'Optional: Specify a Python version (e.g., "3.11"). If blank, uv finds the best match.'
+        required: false
+        type: string
+        default: ''
       build_windows:
         type: boolean
         description: 'Build for Windows'
@@ -67,15 +72,24 @@ jobs:
           version: "0.8.3"
 
       - name: Set up Python
-        run: uv python install
+        # This step conditionally adds the Python version if one was provided in the dispatch inputs.
+        run: |
+          if [[ -n "${{ inputs.python_version }}" ]]; then
+            echo "Installing specified Python version: ${{ inputs.python_version }}"
+            uv python install "${{ inputs.python_version }}"
+          else
+            echo "Installing latest Python version matching project requirements"
+            uv python install
+          fi 
 
       - name: Install
-        run: uv sync
+        run: uv sync --all-extras --all-groups
 
       - name: Build
         run: \
           cd cv
           uv build --out-dir ../dist
+
       - name: Upload wheel as an artifact
         uses: actions/upload-artifact@v4
         with:
