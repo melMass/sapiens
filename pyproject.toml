@@ -62,6 +62,7 @@ torchaudio = [
   { index = "pytorch-nightly", marker = "sys_platform == 'win32'" },
   { index = "pytorch-cpu", marker = "platform_system == 'Darwin'" },
 ]
+chumpy = [{ git = "https://github.com/melmass/chumpy" }]
 # sapiens-cv = [
 #   { index = "mtb", marker = "sys_platform == 'win32'" },
 #   { git = "https://github.com/facebookresearch/sapiens.git", subdirectory = "cv", marker = "sys_platform != 'win32'" },
@@ -86,7 +87,9 @@ sapiens-engine = { workspace = true }
 sapiens-det = { workspace = true }
 sapiens-pose = { workspace = true }
 
-triton = { url = "https://github.com/woct0rdho/triton-windows/releases/download/v3.2.0-windows.post9/triton-3.2.0-cp311-cp311-win_amd64.whl" }
+triton = [
+  { url = "https://github.com/woct0rdho/triton-windows/releases/download/v3.2.0-windows.post9/triton-3.2.0-cp311-cp311-win_amd64.whl", marker = "sys_platform == 'win32'" },
+]
 
 [[tool.uv.dependency-metadata]]
 name = "chumpy"
