@@ -19,7 +19,8 @@ dependencies = [
   "sapiens-cv",               # this is mmcv
   "numpy<2.0.0",
   "pandas>=2.3.0",
-  "triton",
+  "triton; platform_system == 'Linux'",
+  "triton-windows<3.5; platform_system == 'Windows'",
 ]
 
 [tool.uv]
@@ -89,10 +90,6 @@ sapiens-cv = { workspace = true }
 sapiens-engine = { workspace = true }
 sapiens-det = { workspace = true }
 sapiens-pose = { workspace = true }
-
-triton = [
-  { url = "https://github.com/woct0rdho/triton-windows/releases/download/v3.2.0-windows.post9/triton-3.2.0-cp311-cp311-win_amd64.whl", marker = "sys_platform == 'win32'" },
-]
 
 [[tool.uv.dependency-metadata]]
 name = "chumpy"
