@@ -94,7 +94,13 @@ jobs:
           fi 
 
       - name: Install
-        run: uv sync --all-extras --all-groups
+        run: |
+
+          if [[ -n "${{ inputs.python_version }}" ]]; then
+            uv sync --all-extras --all-groups --python "${{ inputs.python_version }}"
+          else
+            uv sync --all-extras --all-groups
+          fi
 
       - name: Build
         working-directory: ./cv
