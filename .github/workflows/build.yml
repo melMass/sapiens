@@ -3,6 +3,14 @@ name: 📦 Build and Append Wheels
 on:
   workflow_dispatch:
     inputs:
+      allow_overwrite:
+        type: boolean
+        description: 'If true, overwrite assets in the release if they already exist.'
+        default: false
+      strict:
+        type: boolean
+        description: 'If true, the entire workflow fails if any single build fails.'
+        default: false
       torch_index_name:
         description: '[NOT USED YET] PyTorch index (only for windows and linux)'
         required: false
@@ -82,17 +90,6 @@ jobs:
         with:
           version: "0.8.8"
 
-      - name: Set up Python
-        # This step conditionally adds the Python version if one was provided in the dispatch inputs.
-        run: |
-          if [[ -n "${{ inputs.python_version }}" ]]; then
-            echo "Installing specified Python version: ${{ inputs.python_version }}"
-            uv python install "${{ inputs.python_version }}"
-          else
-            echo "Installing latest Python version matching project requirements"
-            uv python install
-          fi 
-
       - name: Install
         run: |
 
@@ -115,7 +112,7 @@ jobs:
   append-to-release:
     name: Append to 'wheels' Release
     needs: [prepare-matrix, build]
-    if: success() && needs.prepare-matrix.outputs.os_matrix != '[]'
+    if: (inputs.strict == false || success()) && needs.prepare-matrix.outputs.os_matrix != '[]' 
     runs-on: ubuntu-latest
 
     steps:
@@ -126,26 +123,10 @@ jobs:
           path: dist-all
           merge-multiple: true
 
-      - name: Check for asset collisions
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          EXISTING_ASSETS=$(gh release view wheels --json assets --jq '.assets[].name' || true)
-          echo "Existing assets in 'wheels' release:"
-          echo "$EXISTING_ASSETS"
-
-          for file in dist-all/*.whl; do
-            filename=$(basename "$file")
-            if echo "$EXISTING_ASSETS" | grep -Fxq "$filename"; then
-              echo "❌ ERROR: Asset '$filename' already exists. To prevent collisions, please bump the version in pyproject.toml."
-              exit 1
-            fi
-            echo "✅ OK: Asset '$filename' can be uploaded."
-          done
-
       - name: Append assets to release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: "wheels"
           files: dist-all/*.whl
           body: "Rolling release of built wheels. Assets are added from CI builds."
+          overwrite_files: ${{ inputs.allow_overwrite }}
