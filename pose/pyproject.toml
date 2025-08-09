@@ -27,5 +27,5 @@ dynamic = ["keywords"]
 
 
 [build-system]
-requires = ["setuptools>=42", "torch>1.8", "numpy<2.0.0"]
+requires = ["setuptools>=42", "torch>1.8", "pip", "numpy<2.0.0"]
 build-backend = "setuptools.build_meta"

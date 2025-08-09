@@ -22,9 +22,6 @@ dependencies = [
   "triton",
 ]
 
-[tool.uv]
-no-build-isolation-package = ["sapiens-det"]
-
 [[tool.uv.index]]
 name = "pytorch-nightly"
 url = "https://download.pytorch.org/whl/nightly/cu128"
@@ -90,6 +87,10 @@ sapiens-det = { workspace = true }
 sapiens-pose = { workspace = true }
 
 triton = { url = "https://github.com/woct0rdho/triton-windows/releases/download/v3.2.0-windows.post9/triton-3.2.0-cp311-cp311-win_amd64.whl" }
+
+[[tool.uv.dependency-metadata]]
+name = "chumpy"
+requires-dist = ["pip"]
 
 [tool.uv.workspace]
 members = ["cv", "engine", "det", "pose", "pretrain"]

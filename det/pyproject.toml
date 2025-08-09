@@ -21,5 +21,5 @@ dependencies = [
 ]
 
 [build-system]
-requires = ["setuptools>=42", "cython", "numpy<2.0.0"]
+requires = ["setuptools>=42", "cython", "torch", "numpy<2.0.0"]
 build-backend = "setuptools.build_meta"
